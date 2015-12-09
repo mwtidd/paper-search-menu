@@ -21,7 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../iron-selector/iron-selectable.html">
 <link rel="import" href="../iron-form-element-behavior/iron-form-element-behavior.html">
 <link rel="import" href="../iron-validatable-behavior/iron-validatable-behavior.html">
-
+<link rel="import" href="paper-input-listener.html">
 <!--
 Material design: [Dropdown menus](https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons)
 
@@ -140,6 +140,19 @@ respectively.
   <template>
     <!-- this div fulfills an a11y requirement for combobox, do not remove -->
     <div role="button"></div>
+    <!-- paper-input has type="text" for a11y, do not remove -->
+    <paper-input id="searchInput"
+            type="text"
+            invalid="[[invalid]]"
+            disabled="[[disabled]]"
+            value="[[selectedItemLabel]]"
+            placeholder="[[placeholder]]"
+            always-float-label="[[alwaysFloatLabel]]"
+            no-label-float="[[noLabelFloat]]"
+            label="[[label]]"
+            inputValue="{{searchTerm}}">
+      <paper-input-listener suffix></paper-input-listener>
+    </paper-input>
     <paper-menu-button
       id="menuButton"
       vertical-align="top"
@@ -149,22 +162,11 @@ respectively.
       no-animations="[[noAnimations]]"
       on-iron-select="_onIronSelect"
       on-iron-deselect="_onIronDeselect"
+      focus-target="[[focusTarget]]"
       opened="{{opened}}">
       <div class="dropdown-trigger">
         <paper-ripple></paper-ripple>
-        <!-- paper-input has type="text" for a11y, do not remove -->
-        <paper-input
-          type="text"
-          invalid="[[invalid]]"
-          readonly
-          disabled="[[disabled]]"
-          value="[[selectedItemLabel]]"
-          placeholder="[[placeholder]]"
-          always-float-label="[[alwaysFloatLabel]]"
-          no-label-float="[[noLabelFloat]]"
-          label="[[label]]">
-          <iron-icon icon="arrow-drop-down" suffix></iron-icon>
-        </paper-input>
+
       </div>
       <content id="content" select=".dropdown-content"></content>
     </paper-menu-button>
@@ -240,6 +242,16 @@ respectively.
         },
 
         /**
+         * The current search term
+         **/
+        searchTerm: {
+          type: String,
+          notify: true,
+          value: "",
+          observer: '_searchTermChanged'
+        },
+
+        /**
          * The placeholder for the dropdown.
          */
         placeholder: {
@@ -286,11 +298,14 @@ respectively.
       },
 
       listeners: {
-        'tap': '_onTap'
+        'tap' : '_onTap',
+        'open' : 'open',
+        'close' : 'close'
       },
 
       keyBindings: {
-        'up down': 'open',
+        'up':'previous',
+        'down':'next',
         'esc': 'close'
       },
 
@@ -303,6 +318,10 @@ respectively.
       observers: [
         '_selectedItemChanged(selectedItem)'
       ],
+
+      ready: function(){
+        this.focusTarget = this.$.searchInput;
+      },
 
       attached: function() {
         // NOTE(cdata): Due to timing, a preselected value in a `IronSelectable`
@@ -322,18 +341,40 @@ respectively.
         return Polymer.dom(this.$.content).getDistributedNodes()[0];
       },
 
+      get searchInput(){
+        return Polymer.dom(this.$.searchInput);
+      },
+
       /**
        * Show the dropdown content.
        */
-      open: function() {
+      open: function(event) {
         this.$.menuButton.open();
       },
 
       /**
        * Hide the dropdown content.
        */
-      close: function() {
+      close: function(event) {
         this.$.menuButton.close();
+      },
+
+      /**
+       * Focus on the previous item
+       **/
+      previous: function(){
+        this.$.menuButton.contentElement._focusPrevious();
+        this.focusTarget = this.$.menuButton.contentElement.focusTarget
+        this.open();
+      },
+
+      /**
+       *  Focus on the next item
+       **/
+      next: function(){
+        this.$.menuButton.contentElement._focusNext();
+        this.focusTarget = this.$.menuButton.contentElement.focusTarget
+        this.open();
       },
 
       /**
@@ -413,7 +454,11 @@ respectively.
         var e = this.contentElement;
         if (e) {
           e.setAttribute('aria-expanded', openState);
+          if(this.opened){
+            this.$.searchInput.focus();
+          }
         }
+
       }
     });
   })();
