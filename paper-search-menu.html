@@ -459,6 +459,10 @@ respectively.
           }
         }
 
+      },
+
+      _searchTermChanged: function() {
+        this.fire("search-term-changed");
       }
     });
   })();
