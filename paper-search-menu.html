@@ -149,8 +149,7 @@ respectively.
             placeholder="[[placeholder]]"
             always-float-label="[[alwaysFloatLabel]]"
             no-label-float="[[noLabelFloat]]"
-            label="[[label]]"
-            inputValue="{{searchTerm}}">
+            label="[[label]]">
       <paper-input-listener suffix></paper-input-listener>
     </paper-input>
     <paper-menu-button
@@ -239,16 +238,6 @@ respectively.
          */
         label: {
           type: String
-        },
-
-        /**
-         * The current search term
-         **/
-        searchTerm: {
-          type: String,
-          notify: true,
-          value: "",
-          observer: '_searchTermChanged'
         },
 
         /**
@@ -459,10 +448,6 @@ respectively.
           }
         }
 
-      },
-
-      _searchTermChanged: function() {
-        this.fire("search-term-changed");
       }
     });
   })();
