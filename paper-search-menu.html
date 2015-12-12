@@ -162,6 +162,7 @@ respectively.
       no-animations="[[noAnimations]]"
       on-iron-select="_onIronSelect"
       on-iron-deselect="_onIronDeselect"
+      ignore-select="{{ignoreSelect}}"
       focus-target="[[focusTarget]]"
       opened="{{opened}}">
       <div class="dropdown-trigger">
@@ -248,6 +249,15 @@ respectively.
         },
 
         /**
+         * Set to true to disable automatically closing the dropdown after
+         * a selection has been made.
+         */
+        ignoreSelect: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * True if the dropdown is open. Otherwise, false.
          */
         opened: {
@@ -287,7 +297,6 @@ respectively.
       },
 
       listeners: {
-        'tap' : '_onTap',
         'open' : 'open',
         'close' : 'close'
       },
@@ -382,17 +391,6 @@ respectively.
        */
       _onIronDeselect: function(event) {
         this._setSelectedItem(null);
-      },
-
-      /**
-       * A handler that is called when the dropdown is tapped.
-       *
-       * @param {CustomEvent} event A tap event.
-       */
-      _onTap: function(event) {
-        if (Polymer.Gestures.findOriginalTarget(event) === this) {
-          this.open();
-        }
       },
 
       /**
